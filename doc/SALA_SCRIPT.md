@@ -114,6 +114,7 @@ npm test
 1. **Banners:** colar cada `banners/saida/*.html` na **descrição** da seção correspondente (editar seção, editor HTML em modo código). O `00_principal` vai na descrição da seção Geral. Depois de salvar, conferir se o `<script>` final continua lá.
 2. **Restrição de cada seção:** "Data relativa" após a data de inscrição do usuário, conforme a tabela acima.
 3. **Pesquisa de Satisfação:** criar a seção com esse nome e colar `E_pesquisa.html` na descrição.
+4. **Divisores e questionários:** em cada disciplina, colar os dois arquivos de `banners/saida/divisores/` em Rótulos (Material de Estudo e Questionário) e nomear o questionário conforme `banners/saida/nomes_questionarios.md`. Os divisores não têm script e somem com as demais atividades enquanto a seção está travada.
 
 **Nas outras salas:** copiar ou restaurar o curso modelo. Nada precisa ser regerado. Não renomeie as seções, porque o script reconhece disciplinas e Pesquisa pelo nome.
 

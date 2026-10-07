@@ -66,8 +66,9 @@ img/                    pastas para logo, retratos e temas (as imagens não são
 1. Copie `banners/dados.exemplo.json` para `banners/dados.json` e preencha com o seu curso:
    - marca (nome e logo);
    - disciplinas, com os dias de liberação;
-   - seções especiais (apresentação, encontro ao vivo, prática e pesquisa);
-   - agenda do encontro ao vivo.
+   - seções especiais (apresentação, encontro ao vivo, prática e pesquisa; na pesquisa, `avaliados` lista o que o aluno avalia e `fecho` é a mensagem final);
+   - agenda do encontro ao vivo;
+   - `divisores` (cabeçalhos dos blocos de cada disciplina) e `atividades` (sigla do curso e modelo do nome dos questionários).
 2. (Opcional) Coloque as fotos em `img/psicanalistas/` e `img/temas/` e rode `banners/tratar-imagens.ps1`. Sem foto, o banner usa um monograma.
 3. Gere os banners:
 
@@ -75,7 +76,7 @@ img/                    pastas para logo, retratos e temas (as imagens não são
    node banners/gerar.js
    ```
 
-   A saída fica em `banners/saida/` (um arquivo por seção) e a prévia em `banners/preview.html`.
+   A saída fica em `banners/saida/` (um arquivo por seção) e a prévia em `banners/preview.html`. Os divisores ficam em `banners/saida/divisores/` e os nomes dos questionários em `banners/saida/nomes_questionarios.md`.
 
 Para gerar o exemplo:
 
@@ -88,7 +89,9 @@ node banners/gerar.js --dados=banners/dados.exemplo.json --saida=exemplo/saida -
 1. **Banners:** em cada seção, abra **Editar seção** e, na descrição, use o editor HTML em modo código para colar o arquivo correspondente de `banners/saida/`. O banner principal vai na seção Geral. Depois de salvar, confira se o `<script>` final continua lá.
 2. **Restrição:** em cada seção, use **Data relativa** após a data de inscrição do usuário. Use dias até o limite do campo (`MAX_DIAS` em `gerar.js`) e, acima dele, semanas arredondadas para baixo. A tabela completa está em [doc/SALA_SCRIPT.md](doc/SALA_SCRIPT.md).
 3. **Pesquisa de Satisfação:** crie uma seção com esse nome e cole o banner `E_pesquisa`.
-4. **Validação:** entre com um aluno de teste e use `?psiDebug=1`.
+4. **Divisores:** em cada disciplina, crie dois **Rótulos** e cole `<disciplina>_material.html` acima das unidades e `<disciplina>_questionario.html` acima do questionário.
+5. **Questionários:** use o nome e o número de identificação de `nomes_questionarios.md` (`Questionário D07 · <título>` e `SIGLA-D07-QST`).
+6. **Validação:** entre com um aluno de teste e use `?psiDebug=1`.
 
 ## Testes
 
@@ -98,7 +101,7 @@ npm install
 npm test
 ```
 
-O `npm test` gera os banners de exemplo e roda 25 verificações:
+O `npm test` gera os banners de exemplo e roda 30 verificações:
 - trava dos tiles e data exata;
 - seção aberta por link, com e sem cache;
 - navegação desviada para a Pesquisa e menu lateral;
