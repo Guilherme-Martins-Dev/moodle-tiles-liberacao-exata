@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  var VERSAO = 5;
+  var VERSAO = 6;
   if (window.PsiBanners && window.PsiBanners.v >= VERSAO) { window.PsiBanners.scan(); return; }
 
   var CFG = __PSI_CFG__;
@@ -85,7 +85,16 @@
         var b = banners[i];
         if (!b.visivel || !b.entrou || !b.el.isConnected) continue;
         algum = true;
-        for (var j = 0; j < b.tarefas.length; j++) b.tarefas[j](agora, (agora - b.inicio) / 1000);
+        // O carimbo do 1º quadro pode ser anterior a b.inicio: t nunca é negativo.
+        var t = Math.max(0, (agora - b.inicio) / 1000);
+        try {
+          for (var j = 0; j < b.tarefas.length; j++) b.tarefas[j](agora, t);
+        } catch (e) {
+          // Um banner com erro sai do loop sem congelar os demais.
+          b.tarefas = [];
+          erros.push(e);
+          if (window.console) console.error('[PsiBanners]', e);
+        }
       }
     }
     if (algum && !reduzir) agendar();
@@ -390,7 +399,7 @@
       var nos = V.map(function (v) { return s('circle', { cx: v[0], cy: v[1], r: 4.5, fill: '#fff' }, g); });
       var viajante = s('circle', { r: 2.2, fill: '#fff', stroke: 'none' }, g);
       return function (t) {
-        var u = ((t * 0.22) % 1) * 3, i = Math.floor(u), f = u - i, a = V[i], b = V[(i + 1) % 3];
+        var u = (((t * 0.22) % 1 + 1) % 1) * 3, i = Math.floor(u) % 3, f = u - Math.floor(u), a = V[i], b = V[(i + 1) % 3];
         viajante.setAttribute('cx', f2(a[0] + (b[0] - a[0]) * f));
         viajante.setAttribute('cy', f2(a[1] + (b[1] - a[1]) * f));
         nos.forEach(function (no, k) { no.setAttribute('r', f2(4.5 + (k === i ? 2.2 * Math.max(0, 1 - f * 3) : 0))); });
