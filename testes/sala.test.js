@@ -98,7 +98,7 @@ async function geracao() {
   ok(dv[0].includes('Material de Estudo') && dv[1].includes('Questionário')
     && !dv.some(h => /<script|<svg|<img|<h2|psi-banner/i.test(h)), 'divisores da disciplina gerados, sem script, <h2> nem psi-banner');
   const nomes = fs.readFileSync(path.join(SAIDA, 'nomes_questionarios.md'), 'utf8');
-  ok(/\| 05 \| Questionário D05 · Winnicott e o Ambiente \| CUR-D05-QST \|/.test(nomes)
+  ok(/\| 05 \| Questionário 05 · Winnicott e o Ambiente \| CUR-D05-QST \|/.test(nomes)
     && nomes.split('\n').filter(l => /-QST \|$/.test(l)).length === 8, 'nomes dos questionários: uma linha por disciplina, no padrão');
 }
 

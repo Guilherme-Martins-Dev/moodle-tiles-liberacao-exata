@@ -6,7 +6,7 @@
     { "chave": "material", "icone": "livro", "titulo": "Material de Estudo", "chips": ["4 unidades"] },
     { "chave": "questionario", "icone": "prancheta", "titulo": "Questionário", "chips": ["10 questões", "Nota mínima 7,0"], "destaque": true }
   ],
-  "atividades": { "sigla": "CUR", "questionario": "Questionário D{nn} · {titulo}" },
+  "atividades": { "sigla": "CUR", "questionario": "Questionário {nn} · {titulo}" },
   "nucleos": {
     "institucional": { "nome": "Instituição Exemplo",   "cor": "#0B387A", "glifo": "bussola" },
     "freud":         { "nome": "Freud",                 "cor": "#162B4D", "glifo": "espiral" },

@@ -90,7 +90,7 @@ node banners/gerar.js --dados=banners/dados.exemplo.json --saida=exemplo/saida -
 2. **Restrição:** em cada seção, use **Data relativa** após a data de inscrição do usuário. Use dias até o limite do campo (`MAX_DIAS` em `gerar.js`) e, acima dele, semanas arredondadas para baixo. A tabela completa está em [doc/SALA_SCRIPT.md](doc/SALA_SCRIPT.md).
 3. **Pesquisa de Satisfação:** crie uma seção com esse nome e cole o banner `E_pesquisa`.
 4. **Divisores:** em cada disciplina, crie dois **Rótulos** e cole `<disciplina>_material.html` acima das unidades e `<disciplina>_questionario.html` acima do questionário.
-5. **Questionários:** use o nome e o número de identificação de `nomes_questionarios.md` (`Questionário D07 · <título>` e `SIGLA-D07-QST`).
+5. **Questionários:** use o nome e o número de identificação de `nomes_questionarios.md` (`Questionário 07 · <título>` e `SIGLA-D07-QST`).
 6. **Validação:** entre com um aluno de teste e use `?psiDebug=1`.
 
 ## Testes
