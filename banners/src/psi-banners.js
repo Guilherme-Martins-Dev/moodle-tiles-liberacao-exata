@@ -9,7 +9,7 @@
 (function () {
   'use strict';
 
-  var VERSAO = 6;
+  var VERSAO = 7;
   if (window.PsiBanners && window.PsiBanners.v >= VERSAO) { window.PsiBanners.scan(); return; }
 
   var CFG = __PSI_CFG__;
@@ -707,10 +707,13 @@
     });
   }
 
-  // B · contagem regressiva real para o próximo encontro ao vivo (UTC−3)
+  // B · contagem regressiva real para o próximo encontro ao vivo (horário UTC−3). A agenda vem da
+  // classe psi-ag-<dia da semana 0-6>-<hora início>-<hora fim>, gerada a partir de dados.json.
   function aoVivo(b) {
     var txt = q(b.el, 'live-txt'), ponto = q(b.el, 'live-ponto');
-    if (!txt) return;
+    var ag = (' ' + b.el.className + ' ').match(/ psi-ag-(\d)-(\d{1,2})-(\d{1,2}) /);
+    if (!txt || !ag) return;
+    var DIA_SEM = +ag[1], H_INI = +ag[2], H_FIM = +ag[3];
     // Para testar: ?psiAgora=2026-09-29T19:30:00-03:00
     var desvio = 0;
     try {
@@ -723,13 +726,13 @@
       var meiaNoite = Date.UTC(br.getUTCFullYear(), br.getUTCMonth(), br.getUTCDate()) - BRT;
       var inicio = null;
       for (var d = 0; d <= 7 && inicio === null; d++) {
-        if ((br.getUTCDay() + d) % 7 !== 2) continue;
-        var c = meiaNoite + d * DIA + 19 * H;
-        if (c + 2 * H > agora) inicio = c;
+        if ((br.getUTCDay() + d) % 7 !== DIA_SEM) continue;
+        var c = meiaNoite + d * DIA + H_INI * H;
+        if (c + (H_FIM - H_INI) * H > agora) inicio = c;
       }
       if (inicio === null) return;
       if (agora >= inicio) {
-        txt.textContent = 'Ao vivo agora · até as 21h';
+        txt.textContent = 'Ao vivo agora · até as ' + H_FIM + 'h';
       } else {
         var r = inicio - agora, dd = Math.floor(r / DIA), hh = Math.floor(r % DIA / H),
             mi = Math.floor(r % H / 60000), ss = Math.floor(r % 60000 / 1000);

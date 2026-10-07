@@ -1,0 +1,192 @@
+{
+  "marca": { "nome": "Instituição Exemplo" },
+  "chipsDisciplina": ["Atividade avaliativa"],
+
+  "nucleos": {
+    "institucional": { "nome": "Instituição Exemplo",   "cor": "#0B387A", "glifo": "bussola" },
+    "freud":         { "nome": "Freud",                 "cor": "#162B4D", "glifo": "espiral" },
+    "klein":         { "nome": "Melanie Klein",         "cor": "#2D5253", "glifo": "objetos" },
+    "winnicott":     { "nome": "Winnicott",             "cor": "#3C5A73", "glifo": "holding" },
+    "bion":          { "nome": "Bion",                  "cor": "#313E4E", "glifo": "continente" },
+    "violeta":       { "nome": "Lacan",                 "cor": "#31233D", "glifo": "borromeano" },
+    "ameixa":        { "nome": "Ferenczi",              "cor": "#4A3A56", "glifo": "elastico" },
+    "pratica":       { "nome": "Clínica",               "cor": "#22584D", "glifo": "tripe" },
+    "transmissao":   { "nome": "Ética e transmissão",   "cor": "#485C6E", "glifo": "livro" }
+  },
+
+  "estante": [
+    ["freud", "Freud", "freud"], ["klein", "Klein", "klein"], ["winnicott", "Winnicott", "winnicott"], ["ameixa", "Ferenczi", "ferenczi"],
+    ["bion", "Bion", "bion"], ["violeta", "Lacan", "lacan"], ["pratica", "Clínica", null], ["transmissao", "Ética", null]
+  ],
+
+  "pessoas": {
+    "freud":     { "nome": "Sigmund Freud",    "datas": "1856–1939" },
+    "klein":     { "nome": "Melanie Klein",    "datas": "1882–1960" },
+    "winnicott": { "nome": "Donald Winnicott", "datas": "1896–1971" },
+    "ferenczi":  { "nome": "Sándor Ferenczi",  "datas": "1873–1933" },
+    "bion":      { "nome": "Wilfred Bion",     "datas": "1897–1979" },
+    "lacan":     { "nome": "Jacques Lacan",    "datas": "1901–1981" }
+  },
+
+  "temas": {
+    "tecnica":  "O encontro clínico",
+    "pratica":  "Prática supervisionada"
+  },
+
+  "retratos": {
+    "01": { "autores": ["freud"] },
+    "02": { "autores": ["freud"] },
+    "03": { "autores": ["freud", "ferenczi"] },
+    "04": { "autores": ["klein"] },
+    "05": { "autores": ["winnicott"] },
+    "06": { "autores": ["bion"] },
+    "07": { "autores": ["lacan"] },
+    "08": { "tema": "tecnica" },
+    "C":  { "tema": "pratica" }
+  },
+
+  "principal": {
+    "arquivo": "00_principal",
+    "sobretitulo": "Curso de exemplo · EAD",
+    "titulo": "Curso Exemplo de Psicanálise",
+    "texto": "Dados fictícios para demonstrar os banners animados e a liberação no dia exato em uma sala Moodle com formato Tiles.",
+    "numeros": [
+      { "valor": "8",   "rotulo": "disciplinas" },
+      { "valor": "3",   "rotulo": "módulos" },
+      { "valor": "140", "rotulo": "dias de trilha" }
+    ]
+  },
+
+  "especiais": [
+    {
+      "tipo": "pesquisa",
+      "arquivo": "E_pesquisa",
+      "tile": "Seção · Pesquisa de Satisfação",
+      "nucleo": "institucional",
+      "glifo": "bussola",
+      "rotuloPainel": "Sua voz",
+      "meta": "Pesquisa de satisfação",
+      "titulo": "Pesquisa de Satisfação",
+      "epigrafe": { "texto": "Sua opinião ajuda a melhorar o curso." },
+      "texto": "Enquanto a próxima disciplina não é liberada, conte como está sendo a sua experiência. As respostas são anônimas.",
+      "passos": ["Responda à pesquisa da disciplina que você concluiu", "Avalie conteúdos e o ambiente virtual", "Deixe sugestões, se quiser"],
+      "chips": ["Anônima", "Poucos minutos"]
+    },
+    {
+      "tipo": "apresentacao",
+      "arquivo": "A_apresentacao",
+      "tile": "Seção · Apresentação do curso",
+      "nucleo": "institucional",
+      "glifo": "bussola",
+      "rotuloPainel": "Comece aqui",
+      "meta": "Apresentação do curso",
+      "titulo": "Boas-vindas ao curso",
+      "epigrafe": { "texto": "Uma trilha que se abre a cada 20 dias." },
+      "texto": "Este curso de exemplo mostra como as seções são liberadas a partir da data de matrícula de cada aluno, sempre no dia exato.",
+      "apresentacao": {
+        "cargaHoraria": {
+          "total": "100h",
+          "partes": [
+            { "horas": 80, "rotulo": "Disciplinas",       "detalhe": "8 × 10h",   "cor": "#FFFFFF" },
+            { "horas": 12, "rotulo": "Encontros ao vivo", "detalhe": "semanais",  "cor": "#F8B800" },
+            { "horas": 8,  "rotulo": "Prática",           "detalhe": "a partir do dia 120", "cor": "#B9A6CF" }
+          ]
+        },
+        "cartoes": [
+          { "titulo": "Disciplinas", "glifo": "livro",   "texto": "Oito disciplinas organizadas em três módulos." },
+          { "titulo": "Liberação",   "glifo": "bussola", "texto": "A primeira disciplina abre na matrícula; as demais, a cada 20 dias, sempre no dia exato." },
+          { "titulo": "Encontros",   "glifo": "conexao", "texto": "Encontros ao vivo semanais, com contagem regressiva no banner." },
+          { "titulo": "Prática",     "glifo": "vinculo", "ameixa": true, "texto": "A seção de prática abre 120 dias após a matrícula." }
+        ],
+        "trilha": [
+          { "rotulo": "M1", "dia": 0 },
+          { "rotulo": "M2", "dia": 60 },
+          { "rotulo": "M3", "dia": 120 }
+        ],
+        "marcoAmeixa": { "rotulo": "Prática", "dia": 120 }
+      },
+      "chips": []
+    },
+    {
+      "tipo": "aovivo",
+      "arquivo": "B_encontros",
+      "tile": "Seção · Encontros ao vivo",
+      "nucleo": "institucional",
+      "glifo": "conexao",
+      "rotuloPainel": "Ao vivo",
+      "aoVivo": "Ao vivo · Quintas, 20h–22h",
+      "meta": "Encontros semanais",
+      "titulo": "Encontros ao vivo",
+      "epigrafe": { "texto": "Teoria e clínica em conversa." },
+      "texto": "Seminários e tira-dúvidas ao vivo. O banner mostra a contagem regressiva para o próximo encontro.",
+      "agenda": { "dia": 4, "inicio": 20, "fim": 22, "texto": "Toda quinta, das 20h às 22h (UTC−3)" },
+      "chips": ["Seminários", "Tira-dúvidas", "Gravações disponíveis"]
+    },
+    {
+      "tipo": "pratica",
+      "arquivo": "C_pratica",
+      "tile": "Seção · Prática supervisionada",
+      "nucleo": "pratica",
+      "glifo": "tripe",
+      "rotuloPainel": "Na clínica",
+      "meta": "Prática",
+      "titulo": "Prática Supervisionada",
+      "epigrafe": { "texto": "A clínica se aprende acompanhado." },
+      "texto": "Seção de exemplo liberada 120 dias após a matrícula.",
+      "dias": 120,
+      "passos": ["Leia as orientações da seção", "Realize as atividades práticas", "Entregue o relatório"],
+      "chips": ["Relatório final"]
+    }
+  ],
+
+  "disciplinas": [
+    { "n": 1, "arquivo": "01_introducao", "modulo": 1, "nucleo": "freud", "ch": "10h",
+      "titulo": "Introdução à Psicanálise",
+      "epigrafe": { "texto": "A voz do intelecto é baixa, mas não descansa enquanto não é ouvida.", "fonte": "Freud, 1927" },
+      "texto": "O surgimento da psicanálise e seus conceitos de partida.",
+      "dias": 0,
+      "topicos": ["Origens da psicanálise", "O método da associação livre", "Primeiros conceitos", "Leituras introdutórias"] },
+    { "n": 2, "arquivo": "02_inconsciente", "modulo": 1, "nucleo": "freud", "ch": "10h",
+      "titulo": "O Inconsciente em Freud",
+      "epigrafe": { "texto": "O Eu não é senhor em sua própria casa.", "fonte": "Freud, 1917" },
+      "texto": "Inconsciente, recalque e o retorno do recalcado.",
+      "dias": 20,
+      "topicos": ["O inconsciente", "O recalque", "Formações do inconsciente", "Leituras"] },
+    { "n": 3, "arquivo": "03_sonhos", "modulo": 1, "nucleo": "transmissao", "glifo": "ramos", "ch": "10h",
+      "titulo": "Sonhos e Sintomas",
+      "epigrafe": { "texto": "O sonho é a via régia para o inconsciente.", "fonte": "Freud, 1900" },
+      "texto": "A interpretação dos sonhos e a formação dos sintomas.",
+      "dias": 40,
+      "topicos": ["O trabalho do sonho", "Condensação e deslocamento", "O sintoma", "Casos clássicos"] },
+    { "n": 4, "arquivo": "04_klein", "modulo": 2, "nucleo": "klein", "ch": "10h",
+      "titulo": "Melanie Klein",
+      "epigrafe": { "texto": "O mundo interno e seus objetos." },
+      "texto": "Posições, fantasia inconsciente e a clínica com crianças.",
+      "dias": 60,
+      "topicos": ["Fantasia inconsciente", "Posição esquizoparanoide", "Posição depressiva", "A técnica do brincar"] },
+    { "n": 5, "arquivo": "05_winnicott", "modulo": 2, "nucleo": "winnicott", "ch": "10h",
+      "titulo": "Winnicott e o Ambiente",
+      "epigrafe": { "texto": "Não existe tal coisa como um bebê." },
+      "texto": "Holding, objeto transicional e o verdadeiro self.",
+      "dias": 80,
+      "topicos": ["O ambiente suficientemente bom", "Objeto transicional", "Verdadeiro e falso self", "O brincar"] },
+    { "n": 6, "arquivo": "06_bion", "modulo": 2, "nucleo": "bion", "ch": "10h",
+      "titulo": "Bion e o Pensar",
+      "epigrafe": { "texto": "Continente e contido." },
+      "texto": "A teoria do pensar e a função alfa.",
+      "dias": 100,
+      "topicos": ["Função alfa", "Continente e contido", "Grupos", "Sem memória e sem desejo"] },
+    { "n": 7, "arquivo": "07_lacan", "modulo": 3, "nucleo": "violeta", "ch": "10h",
+      "titulo": "Lacan, Linguagem e Desejo",
+      "epigrafe": { "texto": "O inconsciente é estruturado como uma linguagem." },
+      "texto": "Real, simbólico e imaginário; o desejo e o Outro.",
+      "dias": 120,
+      "topicos": ["O estádio do espelho", "Real, simbólico e imaginário", "O desejo", "A clínica lacaniana"] },
+    { "n": 8, "arquivo": "08_tecnica", "modulo": 3, "nucleo": "pratica", "ch": "10h",
+      "titulo": "Técnica Psicanalítica",
+      "epigrafe": { "texto": "Recordar, repetir e elaborar.", "fonte": "Freud, 1914" },
+      "texto": "Associação livre, atenção flutuante e o enquadre.",
+      "dias": 140,
+      "topicos": ["Associação livre", "Atenção flutuante", "Transferência", "O enquadre"] }
+  ]
+}
