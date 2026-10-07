@@ -115,7 +115,7 @@ As versões, as falhas encontradas e as decisões tomadas estão em [doc/HISTORI
 
 ## Licença
 
-A definir.
+Todos os direitos reservados. O código pode ser visualizado, mas não pode ser usado, copiado, modificado ou distribuído sem autorização por escrito. Veja [LICENSE](LICENSE).
 
 ---
 
@@ -126,3 +126,5 @@ Animated section banners and a room script for **Moodle 3.11 with the Tiles cour
 The server is configured in whole weeks, rounded down, and the script holds the section until the exact date. It reproduces the native restricted-tile look, locks sections opened by direct link, redirects navigation and hides locked sections from the side menu.
 
 No plugins, no admin access and no hard-coded ids are needed, so the course can be duplicated freely. Example data is fictitious.
+
+All rights reserved: the code is published for viewing only (see [LICENSE](LICENSE)).

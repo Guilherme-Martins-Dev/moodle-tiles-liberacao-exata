@@ -1,6 +1,7 @@
 {
   "name": "moodle-tiles-liberacao-exata-testes",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Testes do script da sala e do runtime (jsdom), sobre os banners de exemplo. Dados fictícios.",
   "scripts": {
     "gerar": "node ../banners/gerar.js --dados=../banners/dados.exemplo.json --saida=../exemplo/saida --preview=../exemplo/preview.html --tratadas=sem-fotos",
