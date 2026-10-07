@@ -91,6 +91,31 @@ async function geracao() {
   ok(runtime('04_klein.html').includes('var VERSAO = 13'), 'banners trazem o script da sala v13');
   ok(runtime('04_klein.html').includes('var VERSAO = 7'), 'banners trazem o runtime de animação v7');
   ok(fs.existsSync(path.join(SAIDA, 'E_pesquisa.html')), 'banner da Pesquisa de Satisfação gerado');
+  const pesquisa = fs.readFileSync(path.join(SAIDA, 'E_pesquisa.html'), 'utf8');
+  ok(pesquisa.includes('O que você avalia') && pesquisa.includes('Experiência no AVA') && !/<svg|<img/i.test(pesquisa),
+    'banner da Pesquisa traz os itens avaliados, sem <svg> nem <img>');
+  const dv = ['material', 'questionario'].map(c => fragmento(`divisores/05_winnicott_${c}.html`));
+  ok(dv[0].includes('Material de Estudo') && dv[1].includes('Questionário')
+    && !dv.some(h => /<script|<svg|<img|<h2|psi-banner/i.test(h)), 'divisores da disciplina gerados, sem script, <h2> nem psi-banner');
+  const nomes = fs.readFileSync(path.join(SAIDA, 'nomes_questionarios.md'), 'utf8');
+  ok(/\| 05 \| Questionário D05 · Winnicott e o Ambiente \| CUR-D05-QST \|/.test(nomes)
+    && nomes.split('\n').filter(l => /-QST \|$/.test(l)).length === 8, 'nomes dos questionários: uma linha por disciplina, no padrão');
+}
+
+// Os divisores ficam em Rótulos (atividades da seção): não podem mudar a trava da seção.
+async function divisores() {
+  console.log('\nDivisores na seção');
+  const rotulos = ['material', 'questionario'].map(c => `<li class="activity label">${fragmento(`divisores/05_winnicott_${c}.html`)}</li>`).join('');
+  const corpo = '<ul class="topics">' + secao(7, 'Winnicott e o Ambiente').replace('<li class="activity">', rotulos + '<li class="activity">') + '</ul>';
+  const url = `${URL0}&section=7`;
+  let w = pagina(corpo, { url, agora: '2026-12-23' });
+  await espera(100);
+  ok(w.document.getElementById('section-7').classList.contains('psi-travada') && w.document.querySelectorAll('.psi-aviso-trava').length === 1,
+    'seção com divisores trava na folga, com um só aviso');
+  w = pagina(corpo, { url, agora: '2026-12-26' });
+  await espera(100);
+  ok(!w.document.getElementById('section-7').classList.contains('psi-travada') && w.document.querySelectorAll('.psi-divisor').length === 2,
+    'no dia exato a seção abre e os divisores aparecem');
 }
 
 async function tiles() {
@@ -189,6 +214,7 @@ async function animacao() {
   await geracao();
   await tiles();
   await secaoPorLink();
+  await divisores();
   await navegacao();
   await animacao();
   console.log(`\n${total - falhas}/${total} verificações ok`);
