@@ -2,6 +2,11 @@
   "marca": { "nome": "Instituição Exemplo" },
   "chipsDisciplina": ["Atividade avaliativa"],
 
+  "divisores": [
+    { "chave": "material", "icone": "livro", "titulo": "Material de Estudo", "chips": ["4 unidades"] },
+    { "chave": "questionario", "icone": "prancheta", "titulo": "Questionário", "chips": ["10 questões", "Nota mínima 7,0"], "destaque": true }
+  ],
+  "atividades": { "sigla": "CUR", "questionario": "Questionário D{nn} · {titulo}" },
   "nucleos": {
     "institucional": { "nome": "Instituição Exemplo",   "cor": "#0B387A", "glifo": "bussola" },
     "freud":         { "nome": "Freud",                 "cor": "#162B4D", "glifo": "espiral" },
@@ -64,13 +69,21 @@
       "tile": "Seção · Pesquisa de Satisfação",
       "nucleo": "institucional",
       "glifo": "bussola",
-      "rotuloPainel": "Sua voz",
-      "meta": "Pesquisa de satisfação",
+      "meta": "Central de Pesquisas & Enquetes",
       "titulo": "Pesquisa de Satisfação",
-      "epigrafe": { "texto": "Sua opinião ajuda a melhorar o curso." },
+      "destaque": "Satisfação",
+      "epigrafe": { "texto": "Sua opinião melhora. Sua participação transforma!" },
       "texto": "Enquanto a próxima disciplina não é liberada, conte como está sendo a sua experiência. As respostas são anônimas.",
-      "passos": ["Responda à pesquisa da disciplina que você concluiu", "Avalie conteúdos e o ambiente virtual", "Deixe sugestões, se quiser"],
-      "chips": ["Anônima", "Poucos minutos"]
+      "avaliados": [
+        { "icone": "lampada", "rotulo": "Aprendizagem" },
+        { "icone": "alvo", "rotulo": "Utilidade" },
+        { "icone": "livro", "rotulo": "Materiais de estudo" },
+        { "icone": "prancheta", "rotulo": "Atividades e avaliações" },
+        { "icone": "fone", "rotulo": "Suporte à aprendizagem" },
+        { "icone": "monitor", "rotulo": "Experiência no AVA" },
+        { "icone": "coracao", "rotulo": "Satisfação geral" }
+      ],
+      "fecho": { "texto": "Leva poucos minutos e faz toda a diferença!", "destaque": "poucos minutos" }
     },
     {
       "tipo": "apresentacao",

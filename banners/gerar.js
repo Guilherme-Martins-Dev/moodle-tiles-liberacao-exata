@@ -13,8 +13,10 @@
 // Retratos: coloque as fotos em img/psicanalistas/ (e temas em img/temas/), rode
 // banners/tratar-imagens.ps1 e depois este gerador. Sem foto, entra um monograma.
 //
-// Saída padrão: banners/saida/*.html (um fragmento por seção), banners/saida/_runtime_moodle.html
-// (plano B: HTML adicional do site) e banners/preview.html (revisão).
+// Saída padrão: banners/saida/*.html (um fragmento por seção), banners/saida/divisores/*.html
+// (cabeçalhos dos blocos de cada disciplina, para Rótulos), banners/saida/nomes_questionarios.md
+// (nomes padronizados das atividades), banners/saida/_runtime_moodle.html (plano B: HTML adicional
+// do site) e banners/preview.html (revisão).
 
 const fs = require('fs');
 const path = require('path');
@@ -52,6 +54,12 @@ const T = {
 };
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// Texto escapado com um trecho em dourado (ex.: título "Pesquisa de Satisfação", destaque "Satisfação").
+const destacar = (texto, trecho) => {
+  const i = trecho ? texto.indexOf(trecho) : -1;
+  if (i < 0) return esc(texto);
+  return esc(texto.slice(0, i)) + `<span style="color:${T.dourado};">${esc(trecho)}</span>` + esc(texto.slice(i + trecho.length));
+};
 const pad2 = n => String(n).padStart(2, '0');
 const rgb = hex => { const n = parseInt(hex.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
 const rgba = (hex, a) => `rgba(${rgb(hex).join(',')},${a})`;
@@ -150,6 +158,28 @@ function glifoUri(nome) {
   return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
 }
 const glifoBox = (classe, nome, tam) => `<div class="${classe}" aria-hidden="true" style="width:${tam}px;height:${tam}px;background:url('${glifoUri(nome)}') center/contain no-repeat;${semTexto}">${NBSP}</div>`;
+
+// Ícones de traço (24×24) dos itens avaliados na pesquisa e do fecho; a cor do traço vem de quem usa.
+const ICONES = {
+  lampada: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>',
+  alvo: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  livro: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/>',
+  prancheta: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6M9 16h6"/>',
+  fone: '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
+  monitor: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  coracao: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  relogio: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+};
+
+function iconeUri(nome, cor) {
+  if (!ICONES[nome]) throw new Error(`Ícone desconhecido: ${nome}`);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${cor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONES[nome]}</svg>`;
+  return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+}
+// Círculo com o ícone no centro (fundo + ícone num só elemento, sem <svg> nem <img>).
+const bolaIcone = (nome, tam, fundo, extra = '') => `<div aria-hidden="true" style="width:${tam}px;height:${tam}px;border-radius:50%;background:${fundo} url('${iconeUri(nome, T.navy)}') center/${Math.round(tam * 0.46)}px no-repeat;${extra}${semTexto}">${NBSP}</div>`;
+// Ícone solto, só o traço.
+const iconeBox = (nome, tam, cor) => `<span aria-hidden="true" style="flex:0 0 auto;display:inline-block;width:${tam}px;height:${tam}px;background:url('${iconeUri(nome, cor)}') center/contain no-repeat;${semTexto}">${NBSP}</span>`;
 
 // ---------- Peças compartilhadas ----------
 function capsulaLogo(h) {
@@ -318,6 +348,24 @@ function topicos(d) {
     + `<div style="display:flex;flex-wrap:wrap;gap:10px 22px;">${itens}</div></div>`;
 }
 
+// Pesquisa: o que o aluno avalia ({ icone, rotulo }), em lista numerada. A última linha fecha em dourado.
+function avaliados(lista) {
+  return lista.map((a, i) => {
+    const ultimo = i === lista.length - 1;
+    return `<div class="psi-in" style="display:flex;align-items:center;gap:14px;padding:10px 0;border-top:1px solid rgba(255,255,255,.12);">`
+      + `<span style="flex:0 0 22px;font-family:${T.serif};font-size:15px;line-height:1;color:${ultimo ? T.dourado : 'rgba(255,255,255,.45)'};">${pad2(i + 1)}</span>`
+      + iconeBox(a.icone, 20, ultimo ? T.dourado : '#FFFFFF')
+      + `<span style="min-width:0;font-size:14px;line-height:1.35;color:${ultimo ? '#FFFFFF' : 'rgba(255,255,255,.9)'};${ultimo ? 'font-weight:600;' : ''}">${esc(a.rotulo)}</span></div>`;
+  }).join('');
+}
+
+// Pesquisa: mensagem final em pílula ({ texto, destaque }), com o relógio.
+function fecho(f) {
+  return `<div class="psi-in" style="margin:0 0 4px;"><div style="display:inline-flex;align-items:center;gap:11px;max-width:100%;box-sizing:border-box;padding:8px 18px 8px 8px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">`
+    + bolaIcone('relogio', 32, T.dourado, 'flex:0 0 auto;')
+    + `<span style="font-size:15px;font-weight:600;line-height:1.35;color:#FFFFFF;">${destacar(f.texto, f.destaque)}</span></div></div>`;
+}
+
 // Chip da liberação (em dias a partir da matrícula), com destaque dourado discreto.
 const chipDias = dias => `<span class="psi-chip" style="display:inline-block;padding:5px 12px;border:1px solid rgba(248,184,0,.5);border-radius:999px;background:rgba(248,184,0,.1);color:#FFE7A3;font-size:12.5px;line-height:1.4;white-space:nowrap;">`
   + (dias ? `Disponível ${dias} dias após a matrícula` : 'Disponível desde a matrícula') + `</span>`;
@@ -419,6 +467,29 @@ function bannerEspecial(e, seed) {
   });
 }
 
+// Pesquisa de Satisfação: título de herói à esquerda e, à direita, o painel com o que o aluno avalia.
+// A bússola fica no painel como marca d'água (o runtime anima o psi-tema-glifo).
+function bannerPesquisa(e, seed) {
+  const cor = dados.nucleos[e.nucleo].cor;
+  return raiz({ tipo: e.tipo, g: e.glifo, s: seed }, cor,
+    `<div style="position:relative;z-index:2;display:flex;flex-wrap:wrap;">`
+    + `<div style="flex:999 1 480px;min-width:0;box-sizing:border-box;padding:28px 38px 32px;">`
+    + `<div class="psi-in" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 18px;margin-bottom:30px;">${meta(e.meta)}${capsulaLogo(20)}</div>`
+    + `<h2 class="psi-in" style="margin:0;padding:0;font-family:${T.serif};font-size:44px;line-height:1.08;font-weight:400;color:#FFFFFF;letter-spacing:-.01em;overflow-wrap:break-word;">${destacar(e.titulo, e.destaque)}</h2>`
+    + `<div class="psi-in" aria-hidden="true" style="width:64px;height:3px;border-radius:2px;background:${T.dourado};margin:18px 0 20px;${semTexto}">${NBSP}</div>`
+    + epigrafe(e.epigrafe, T.dourado)
+    + (e.texto ? `<p class="psi-in" style="margin:0 0 22px;padding:0;font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.72);max-width:58ch;">${esc(e.texto)}</p>` : '')
+    + (e.fecho ? fecho(e.fecho) : '')
+    + `</div>`
+    + `<div class="psi-painel" style="flex:1 1 320px;min-width:0;box-sizing:border-box;position:relative;overflow:hidden;padding:30px 30px 26px;background:rgba(0,0,0,.18);border-left:1px solid rgba(255,255,255,.08);">`
+    + `<div aria-hidden="true" style="position:absolute;right:-34px;bottom:-34px;opacity:.1;pointer-events:none;">${glifoBox('psi-tema-glifo', e.glifo, 170)}</div>`
+    + `<div style="position:relative;">`
+    + `<div class="psi-in">${rotuloSecao('O que você avalia')}</div>`
+    + avaliados(e.avaliados || [])
+    + `</div></div></div>`
+  );
+}
+
 function bannerPrincipal(p) {
   const alturas = [100, 76, 88, 70, 82, 94, 78, 86];
   const estante = dados.estante.map(([k, rot], i) => {
@@ -459,11 +530,40 @@ function bannerPrincipal(p) {
   );
 }
 
+// ---------- Divisores (Rótulos dentro da seção da disciplina) ----------
+// Cabeçalho fino de um bloco de atividades ("Material de Estudo", "Questionário"), na cor do núcleo
+// da disciplina. Vai num Rótulo, sem script. Não usa a classe psi-banner nem <h2>: o runtime e o
+// script da sala procuram por eles para achar o banner da seção.
+function divisor(d, v) {
+  const cor = dados.nucleos[d.nucleo].cor, fundo = profundo(cor);
+  const acento = v.destaque ? T.dourado : 'rgba(255,255,255,.28)';
+  return `<div lang="pt-BR" class="nolink psi-divisor psi-dv-${v.chave}" style="position:relative;box-sizing:border-box;width:100%;max-width:1100px;margin:0 auto 12px;padding:14px 22px 14px 18px;border-radius:14px;border-left:4px solid ${acento};overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;color:#FFFFFF;font-family:${T.sans};line-height:1.4;text-align:left;box-shadow:0 8px 20px -14px rgba(8,14,30,.55);background-color:${fundo};background-image:radial-gradient(circle at 88% 0%,rgba(140,116,168,.28) 0%,rgba(140,116,168,0) 60%),linear-gradient(135deg,${cor} 0%,${fundo} 100%);">`
+    + `<div style="flex:1 1 260px;min-width:0;display:flex;align-items:center;gap:14px;">`
+    + `<span aria-hidden="true" style="flex:0 0 auto;display:inline-block;width:42px;height:42px;box-sizing:border-box;border-radius:50%;border:1px solid ${v.destaque ? rgba(T.dourado, 0.7) : 'rgba(255,255,255,.3)'};background:rgba(255,255,255,.06) url('${iconeUri(v.icone, v.destaque ? T.dourado : '#FFFFFF')}') center/20px no-repeat;${semTexto}">${NBSP}</span>`
+    + `<div style="min-width:0;">`
+    + `<div style="font-size:10.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);">Disciplina ${pad2(d.n)}</div>`
+    + `<div style="font-family:${T.serif};font-size:20px;line-height:1.2;color:#FFFFFF;">${esc(v.titulo)}</div>`
+    + `</div></div>`
+    + ((v.chips || []).length ? `<div style="display:flex;flex-wrap:wrap;gap:8px;">${v.chips.map(chip).join('')}</div>` : '')
+    + `</div>`;
+}
+
+// ---------- Nomes padronizados das atividades ----------
+// Questionário de cada disciplina: nome (o aluno vê) e número de identificação (relatórios).
+// Modelo do nome em dados.atividades.questionario, com {nn} e {titulo}.
+const ATIV = dados.atividades;
+const nomesQuestionarios = !ATIV ? [] : dados.disciplinas.map(d => ({
+  n: pad2(d.n),
+  nome: ATIV.questionario.replace('{nn}', pad2(d.n)).replace('{titulo}', d.titulo),
+  id: `${ATIV.sigla}-D${pad2(d.n)}-QST`,
+}));
+
 // ---------- Montagem ----------
 const itens = [
   { arq: dados.principal.arquivo, rot: 'Banner principal · Seção geral (acima dos tiles)', html: bannerPrincipal(dados.principal) },
-  ...dados.especiais.map((e, i) => ({ arq: e.arquivo, rot: e.tile, html: bannerEspecial(e, 21 + i) })),
-  ...dados.disciplinas.map(d => ({ arq: d.arquivo, rot: `Tile ${d.n + 2} · Disciplina ${pad2(d.n)} · Módulo ${d.modulo}`, html: bannerDisciplina(d) })),
+  ...dados.especiais.map((e, i) => ({ arq: e.arquivo, rot: e.tile, html: e.tipo === 'pesquisa' ? bannerPesquisa(e, 21 + i) : bannerEspecial(e, 21 + i) })),
+  ...dados.disciplinas.map(d => ({ arq: d.arquivo, rot: `Tile ${d.n + 2} · Disciplina ${pad2(d.n)} · Módulo ${d.modulo}`, html: bannerDisciplina(d),
+    divisores: (dados.divisores || []).map(v => ({ arq: `${d.arquivo}_${v.chave}`, html: divisor(d, v) })) })),
 ];
 
 const pastaSaida = arg('saida') ? path.resolve(arg('saida')) : path.join(__dirname, 'saida');
@@ -473,6 +573,21 @@ fs.mkdirSync(pastaSaida, { recursive: true });
 for (const it of itens) {
   fs.writeFileSync(path.join(pastaSaida, it.arq + '.html'),
     `<!-- ${it.rot} · Colar no editor HTML (modo código) do rótulo -->\n${it.html}\n`, 'utf8');
+}
+
+// Divisores: um Rótulo por bloco, dentro da seção da disciplina.
+const divisores = itens.flatMap(it => it.divisores || []);
+if (divisores.length) fs.mkdirSync(path.join(pastaSaida, 'divisores'), { recursive: true });
+for (const dv of divisores) {
+  fs.writeFileSync(path.join(pastaSaida, 'divisores', dv.arq + '.html'),
+    `<!-- Divisor · Colar no editor HTML (modo código) de um Rótulo, dentro da seção da disciplina -->\n${dv.html}\n`, 'utf8');
+}
+
+if (nomesQuestionarios.length) {
+  fs.writeFileSync(path.join(pastaSaida, 'nomes_questionarios.md'),
+    `# Questionários · ${nomeCurso}\n\nNome da atividade e número de identificação (Configurações comuns de módulos) de cada questionário.\n\n`
+    + `| Disciplina | Nome da atividade | Número de identificação |\n|---|---|---|\n`
+    + nomesQuestionarios.map(q => `| ${q.n} | ${q.nome} | ${q.id} |`).join('\n') + '\n', 'utf8');
 }
 
 // Plano B: se o editor do Moodle remover o <script> dos rótulos, cole este arquivo uma única vez em
@@ -492,11 +607,16 @@ const preview = `<!doctype html>
 <ul style="display:flex;flex-wrap:wrap;gap:12px;list-style:none;margin:0 0 32px;padding:0;">
 ${[[dados.disciplinas[0], false], [dados.disciplinas[2], true], [dados.disciplinas[3], true]].map(([d, restrito]) => `<li class="tile" style="flex:1 1 200px;padding:14px;background:#F2F7FC;border-top:4px solid #1672CE;${restrito ? 'opacity:.6;' : ''}">${restrito ? '<span style="display:inline-block;padding:2px 8px;border-radius:6px;background:#9FD8F5;font-size:11px;font-weight:700;">Restrito</span>' : ''}<h3 style="margin:8px 0 0;font-size:15px;font-weight:400;">${esc(d.titulo)}</h3></li>`).join('\n')}
 </ul>`}
-${itens.map(it => `<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6B7684;margin:0 0 8px;">${esc(it.rot)} · <code style="text-transform:none;letter-spacing:0;">${it.arq}.html</code></div>\n${it.html}`).join('\n<div style="height:18px"></div>\n')}
+${itens.map(it => `<div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#6B7684;margin:0 0 8px;">${esc(it.rot)} · <code style="text-transform:none;letter-spacing:0;">${it.arq}.html</code></div>\n${it.html}${(it.divisores || []).map(dv => `\n<div style="height:12px"></div>\n${dv.html}`).join('')}`).join('\n<div style="height:18px"></div>\n')}
 <h2 style="font-family:${T.serif};font-weight:400;font-size:22px;margin:48px 0 12px;">Largura de celular (380px)</h2>
 <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start;">
 ${[itens[0], ...dados.especiais.filter(e => e.tipo === 'aovivo' || e.tipo === 'pratica').slice(0, 2).map(e => itens.find(it => it.arq === e.arquivo)), itens[itens.length - 1]].filter(Boolean).map(it =>`<div style="width:380px;max-width:100%;">${it.html}</div>`).join('\n')}
-</div>
+</div>${nomesQuestionarios.length ? `
+<h2 style="font-family:${T.serif};font-weight:400;font-size:22px;margin:48px 0 12px;">Nomes dos questionários</h2>
+<table style="border-collapse:collapse;width:100%;background:#FFFFFF;font-size:14px;">
+<tr style="text-align:left;background:#DDE4EB;"><th style="padding:8px 12px;">Disciplina</th><th style="padding:8px 12px;">Nome da atividade</th><th style="padding:8px 12px;">Número de identificação</th></tr>
+${nomesQuestionarios.map(q => `<tr style="border-top:1px solid #DDE4EB;"><td style="padding:8px 12px;">${q.n}</td><td style="padding:8px 12px;">${esc(q.nome)}</td><td style="padding:8px 12px;"><code>${esc(q.id)}</code></td></tr>`).join('\n')}
+</table>` : ''}
 </div></body></html>
 `;
 fs.mkdirSync(path.dirname(arqPreview), { recursive: true });
@@ -504,5 +624,5 @@ fs.writeFileSync(arqPreview, preview, 'utf8');
 
 const tamanhos = itens.map(it => Buffer.byteLength(it.html));
 const comFoto = Object.keys(dados.pessoas).filter(s => imagem(s, 'arco')).length;
-console.log(`${itens.length} banners gerados em ${pastaSaida}${SEM_JS ? ' (sem JS)' : ''}`);
+console.log(`${itens.length} banners${divisores.length ? ` e ${divisores.length} divisores` : ''} gerados em ${pastaSaida}${SEM_JS ? ' (sem JS)' : ''}`);
 console.log(`Retratos com foto: ${comFoto}/${Object.keys(dados.pessoas).length} (demais com monograma) · fragmentos de ${Math.round(Math.min(...tamanhos) / 1024)} a ${Math.round(Math.max(...tamanhos) / 1024)} KB`);
