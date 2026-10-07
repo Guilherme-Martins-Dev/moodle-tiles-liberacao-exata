@@ -1,0 +1,23 @@
+Coloque aqui as fotos licenciadas dos psicanalistas, com estes nomes de arquivo
+(.jpg, .jpeg ou .png; de preferência com 600px ou mais de largura, rosto no terço superior):
+
+  freud.jpg        Sigmund Freud
+  anna-freud.jpg   Anna Freud
+  klein.jpg        Melanie Klein
+  winnicott.jpg    Donald Winnicott
+  ferenczi.jpg     Sándor Ferenczi
+  balint.jpg       Michael Balint
+  dolto.jpg        Françoise Dolto
+  bion.jpg         Wilfred Bion
+  lacan.jpg        Jacques Lacan
+  kohut.jpg        Heinz Kohut
+
+Imagens temáticas (banners sem autor) vão em ..\temas\ :
+  apresentacao.jpg, conexoes.jpg, escolas.jpg, psicopatologia.jpg, atualidade.jpg, seminarios.jpg
+
+Depois, na raiz do projeto:
+  powershell -ExecutionPolicy Bypass -File banners\tratar-imagens.ps1
+  node banners\gerar.js
+
+Enquanto uma foto não existir, o banner mostra um monograma (iniciais) no lugar.
+Quem aparece em cada banner é definido em banners\dados.json, no bloco "retratos".

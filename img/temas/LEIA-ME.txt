@@ -1,0 +1,3 @@
+Imagens temáticas para os banners sem autor (veja ..\psicanalistas\LEIA-ME.txt):
+  apresentacao.jpg, conexoes.jpg, escolas.jpg, psicopatologia.jpg, atualidade.jpg, seminarios.jpg
+Sem imagem, o banner mostra o símbolo do núcleo no lugar.
