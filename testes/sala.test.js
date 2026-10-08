@@ -1,6 +1,10 @@
-// Testes do script da sala (banners/src/psi-sala.js) e do runtime de animação, sobre os banners de
-// exemplo (banners/dados.exemplo.json). 'npm test' gera exemplo/saida/ antes de testar.
+// moodle-tiles-liberacao-exata · Copyright (c) 2026 Guilherme Martins. Todos os direitos reservados.
+// Uso, cópia e modificação dependem de autorização por escrito (ver LICENSE).
+//
+// Testes do script da sala (banners/src/psi-sala.js), do runtime de animação e da licença, sobre os
+// banners de exemplo (banners/dados.exemplo.json). 'npm test' gera exemplo/saida/ antes de testar.
 // Todos os dados são fictícios: domínio, ids de curso/usuário e datas.
+// ava.exemplo.edu tem licença de demonstração (dados.exemplo.json); ava.outro.edu não tem licença.
 //
 // Cenário: aluno matriculado em 06/10/2026 16:18.
 //   Melanie Klein  D60 (plugin 8 semanas)   -> exata 05/12/2026 16:18
@@ -10,7 +14,9 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { webcrypto } = require('crypto');
 const { JSDOM, VirtualConsole } = require('jsdom');
+const emissor = require('../banners/licenca.js');
 // Sem o aviso do jsdom de navegação não implementada (o desvio muda location.href).
 const vc = () => new VirtualConsole().sendTo(console, { omitJSDOMErrors: true });
 
@@ -32,7 +38,10 @@ const runtime = f => {
   const b = /atob\("([^"]+)"/.exec(fs.readFileSync(path.join(SAIDA, f), 'utf8'))[1];
   return decodeURIComponent(escape(Buffer.from(b, 'base64').toString('binary')));
 };
-const sala = (() => { const r = runtime('04_klein.html'); return r.slice(r.lastIndexOf("(function () {\n'use strict';")); })();
+// O runtime traz três blocos, nesta ordem: licença, animação e script da sala.
+const INICIO = "(function () {\n'use strict';";
+const licenca = (() => { const r = runtime('04_klein.html'); return r.slice(0, r.indexOf(INICIO, 1)); })();
+const sala = (() => { const r = runtime('04_klein.html'); return r.slice(r.lastIndexOf(INICIO)); })();
 const espera = ms => new Promise(r => setTimeout(r, ms));
 
 // Ambiente mínimo do Moodle + stubs de APIs que o jsdom não tem.
@@ -41,16 +50,34 @@ function ambiente(w, { cache = true, inicial = '<html></html>' } = {}) {
   w.__logs = [];
   w.console.info = (...a) => w.__logs.push(a.join(' '));
   w.console.error = (...a) => w.__logs.push('ERR ' + a.join(' '));
+  w.console.warn = (...a) => w.__logs.push('WARN ' + a.join(' '));
+  // crypto.subtle do Node (o jsdom não tem); os buffers vêm de outro realm, por isso o Buffer.from.
+  Object.defineProperty(w.crypto, 'subtle', { configurable: true, value: {
+    importKey: (f, k, alg, ext, usos) => webcrypto.subtle.importKey(f, { ...k }, { ...alg }, ext, [...usos]),
+    verify: (alg, chave, ass, msg) => webcrypto.subtle.verify({ ...alg }, chave, Buffer.from(ass), Buffer.from(msg)),
+  } });
+  w.__falas = [];
+  w.SpeechSynthesisUtterance = function (t) { this.text = t; };
+  w.speechSynthesis = { speak: u => w.__falas.push(u.lang + ' ' + u.text) };
   w.HTMLCanvasElement.prototype.getContext = () => null;
   w.requestAnimationFrame = () => 0;
   if (cache) w.localStorage.setItem(`psi-matricula-${CURSO}-7`, JSON.stringify({ iso: MATRICULA }));
   w.__buscas = [];
   w.fetch = u => { w.__buscas.push(u); return Promise.resolve({ text: () => Promise.resolve(/section=/.test(u) ? '<html></html>' : inicial) }); };
 }
-function pagina(corpo, { url = URL0, agora, ...opc }) {
+// modulo: o bloco de licença avaliado antes do script da sala ('' = sem o bloco).
+// agora: data de hoje (AAAA-MM-DD), fixada no relógio da janela. O ?psiAgora= do script só vale em
+// ambiente local, e os cenários rodam no domínio do exemplo. psiAgora: valor do parâmetro na URL.
+function pagina(corpo, { url = URL0, agora, psiAgora, modulo = licenca, ...opc }) {
   const dom = new JSDOM(`<!doctype html><body class="format-tiles course-${CURSO}">${corpo}</body>`,
-    { url: `${url}${url.includes('?') ? '&' : '?'}psiDebug=1&psiAgora=${agora}`, runScripts: 'outside-only', pretendToBeVisual: true, virtualConsole: vc() });
+    { url: `${url}${url.includes('?') ? '&' : '?'}psiDebug=1${psiAgora ? `&psiAgora=${psiAgora}` : ''}`, runScripts: 'outside-only', pretendToBeVisual: true, virtualConsole: vc() });
+  const Real = dom.window.Date, [a, m, d] = agora.split('-').map(Number), t0 = new Real(a, m - 1, d).getTime();
+  dom.window.Date = class extends Real {
+    constructor(...args) { if (args.length) super(...args); else super(t0); }
+    static now() { return t0; }
+  };
   ambiente(dom.window, opc);
+  if (modulo) dom.window.eval(modulo);
   dom.window.eval(sala);
   return dom.window;
 }
@@ -88,8 +115,8 @@ const MENU = `<ul class="sidebar-menu"><li><a class="nav-link" href="${URL0}" da
 // ---------------------------------------------------------------- cenários
 async function geracao() {
   console.log('\nGeração');
-  ok(runtime('04_klein.html').includes('var VERSAO = 13'), 'banners trazem o script da sala v13');
-  ok(runtime('04_klein.html').includes('var VERSAO = 7'), 'banners trazem o runtime de animação v7');
+  ok(runtime('04_klein.html').includes('var VERSAO = 14'), 'banners trazem o script da sala v14');
+  ok(runtime('04_klein.html').includes('var VERSAO = 8'), 'banners trazem o runtime de animação v8');
   ok(fs.existsSync(path.join(SAIDA, 'E_pesquisa.html')), 'banner da Pesquisa de Satisfação gerado');
   const pesquisa = fs.readFileSync(path.join(SAIDA, 'E_pesquisa.html'), 'utf8');
   ok(pesquisa.includes('O que você avalia') && pesquisa.includes('Experiência no AVA') && !/<svg|<img/i.test(pesquisa),
@@ -186,7 +213,7 @@ async function navegacao() {
 async function animacao() {
   console.log('\nAnimação (glifo tripe com tempo negativo no 1º quadro)');
   const dom = new JSDOM('<!doctype html><body>' + fragmento('08_tecnica.html') + '</body>', {
-    runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc(),
+    url: 'http://localhost/', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc(),
     beforeParse(w) {
       w.M = { cfg: { wwwroot: W } };
       w.console.info = () => {};
@@ -210,6 +237,86 @@ async function animacao() {
   ok(w.__quadros.length > 0, 'loop continua agendado depois do 1º quadro');
 }
 
+// Autoria, licença por domínio e reação ao uso não autorizado (doc/LICENCIAMENTO.md).
+async function licenciamento() {
+  console.log('\nAutoria e licença');
+  const bruto = fs.readFileSync(path.join(SAIDA, '04_klein.html'), 'utf8');
+  ok(/^<!--.*© 2026 Guilherme Martins.*-->/.test(bruto) && bruto.includes('&#8203;') && /class="psi-credito"[^>]*>Desenvolvido por Guilherme Martins</.test(bruto),
+    'banner gerado traz comentário de autoria, marca invisível e linha de crédito');
+  ok(/^<!--.*© 2026 Guilherme Martins.*-->/.test(fs.readFileSync(path.join(SAIDA, 'divisores', '05_winnicott_material.html'), 'utf8')),
+    'divisor gerado traz o comentário de autoria');
+
+  const corpo = TILES + '<ul class="sections">' + secao(6, 'Melanie Klein') + '</ul>';
+  // O exemplo traz uma licença de demonstração: funciona, com a faixa "Demonstração".
+  let w = pagina(corpo, { agora: '2026-12-23' });
+  await espera(100);
+  ok(w.PsiLicenca.estado === 'demo' && w.PsiLicenca.autor === 'Guilherme Martins', 'domínio do exemplo: licença de demonstração');
+  ok((w.document.querySelector('.psi-banner > .psi-credito') || {}).textContent === 'Desenvolvido por Guilherme Martins', 'crédito recriado no banner que não o tem');
+  ok(/^Demonstração · © Guilherme Martins/.test((w.document.querySelector('.psi-banner > .psi-aviso-licenca') || {}).textContent || '')
+    && /tile-restricted/.test(w.document.getElementById('tile-7').className), 'demonstração: faixa "Demonstração" no banner e script da sala ativo');
+  clicar(w, '#tile-6 h3');
+  ok(!w.__falas.length && !w.__logs.some(l => /^WARN/.test(l)), 'demonstração: sem voz e sem aviso no console');
+
+  // Licença plena: só na máquina do autor, que tem a chave privada para emitir uma na hora.
+  let plena = null;
+  try { plena = emissor.assinar('ava.plena.test'); } catch (e) { }
+  if (plena) {
+    w = pagina(corpo, { url: `https://ava.plena.test/course/view.php?id=${CURSO}`, agora: '2026-12-23', modulo: licenca.replace('"d":{}', `"d":{"ava.plena.test":"${plena}"}`) });
+    await espera(100);
+    ok(w.PsiLicenca.estado === 'autorizado' && !w.document.querySelector('.psi-aviso-licenca') && !!w.document.querySelector('.psi-banner > .psi-credito')
+      && /tile-restricted/.test(w.document.getElementById('tile-7').className), 'licença plena: autorizado, com crédito, sem faixa e com a trava ativa');
+  } else console.log('  --   licença plena não testada (sem a chave privada nesta máquina)');
+
+  // Data simulada pela URL: ignorada fora do ambiente local.
+  w = pagina(corpo, { agora: '2026-12-23', psiAgora: '2026-12-26' });
+  await espera(100);
+  ok(/tile-restricted/.test(w.document.getElementById('tile-7').className), 'psiAgora ignorado no domínio do AVA: o tile continua travado');
+  w = pagina(corpo, { url: `http://localhost/course/view.php?id=${CURSO}`, agora: '2026-12-23', psiAgora: '2026-12-26' });
+  await espera(100);
+  ok(w.PsiLicenca.estado === 'local' && !/tile-restricted/.test(w.document.getElementById('tile-7').className), 'psiAgora aceito em localhost');
+
+  const OUTRO = `https://ava.outro.edu/course/view.php?id=${CURSO}`;
+  w = pagina(corpo, { url: OUTRO, agora: '2026-12-23' });
+  await espera(100);
+  ok(w.PsiLicenca.estado === 'negado', 'domínio sem licença: negado');
+  ok(/Uso não autorizado · © Guilherme Martins/.test((w.document.querySelector('.psi-banner > .psi-aviso-licenca') || {}).textContent || ''),
+    'faixa de uso não autorizado sobre o banner');
+  ok(w.__logs.some(l => /^WARN.*uso não autorizado/.test(l)) && w.__logs.some(l => /^WARN.*Guilherme Martins/.test(l)), 'aviso no console com o autor');
+  ok(!/tile-restricted/.test(w.document.getElementById('tile-7').className) && w.document.getElementById('tile-8').querySelector('.badge').textContent === 'Restrito',
+    'script da sala desativado: tile na folga destravado e selo do plugin restaurado');
+  ok(!w.__falas.length, 'sem interação, nenhuma fala');
+  clicar(w, '#tile-6 h3');
+  clicar(w, '#tile-6 h3');
+  ok(w.__falas.length === 1 && /^pt-BR .*Guilherme Martins, sem autorização/.test(w.__falas[0]), 'fala em pt-BR no primeiro clique, uma única vez');
+  w.document.querySelector('.psi-aviso-licenca').remove();
+  await espera(350);
+  ok(!!w.document.querySelector('.psi-banner > .psi-aviso-licenca'), 'faixa removida do DOM é recolocada');
+
+  w = pagina('<ul class="topics">' + secao(7, 'Winnicott e o Ambiente') + '</ul>', { url: `${OUTRO}&section=7`, agora: '2026-12-23' });
+  await espera(100);
+  const s = w.document.getElementById('section-7');
+  ok(!s.classList.contains('psi-travada') && !s.classList.contains('psi-verificando'), 'sem licença, a seção aberta por link não é travada nem fica oculta');
+
+  // Assinatura adulterada (um caractere trocado) no domínio licenciado.
+  const ass = /"ava\.exemplo\.edu":"([^"]+)"/.exec(licenca)[1];
+  w = pagina(corpo, { agora: '2026-12-23', modulo: licenca.replace(ass, (ass[0] === 'A' ? 'B' : 'A') + ass.slice(1)) });
+  await espera(100);
+  ok(w.PsiLicenca.estado === 'negado' && !/tile-restricted/.test(w.document.getElementById('tile-7').className), 'assinatura adulterada: negado');
+
+  w = pagina(corpo, { agora: '2026-12-23', modulo: '' });
+  await espera(100);
+  ok(!/tile-restricted/.test(w.document.getElementById('tile-7').className), 'sem o bloco de licença, o script da sala não trava nada');
+
+  // Banner completo (os três blocos) num domínio sem licença: nada é animado.
+  const dom = new JSDOM('<!doctype html><body>' + fragmento('08_tecnica.html') + '</body>', {
+    url: 'https://ava.outro.edu/', runScripts: 'dangerously', pretendToBeVisual: true, virtualConsole: vc(),
+    beforeParse(j) { j.M = { cfg: { wwwroot: W } }; j.console.info = () => {}; j.console.warn = () => {}; j.HTMLCanvasElement.prototype.getContext = () => null; }
+  });
+  await espera(100);
+  ok(dom.window.PsiBanners.banners() === 0 && !!dom.window.document.querySelector('.psi-aviso-licenca'),
+    'sem licença, o runtime de animação não inicia e o banner mostra a faixa');
+}
+
 (async () => {
   await geracao();
   await tiles();
@@ -217,6 +324,7 @@ async function animacao() {
   await divisores();
   await navegacao();
   await animacao();
+  await licenciamento();
   console.log(`\n${total - falhas}/${total} verificações ok`);
   process.exit(falhas ? 1 : 0);
 })();
