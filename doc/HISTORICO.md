@@ -71,6 +71,15 @@ O repositório git foi criado depois das versões abaixo. Por isso os commits ag
   - **Solução:** esconder a entrada (itens de seção do Moodle, `data-type="30"`) até o dia exato.
   - O mesmo menu passou a alimentar o mapa seção → disciplina nas páginas de seção.
 
+### v14: licença por domínio
+
+- **Requisito:** o repositório é público, e o script não podia ser usado por quem apenas o copiasse.
+  - **Solução:** licença assinada por domínio ([LICENCIAMENTO.md](LICENCIAMENTO.md)). O script começa na hora, para a seção não piscar, e se desliga se a licença não for conferida: desfaz as travas e devolve a pílula do plugin.
+- **Dificuldade:** a conferência da assinatura no navegador é assíncrona, e a seção não pode mostrar o conteúdo enquanto espera.
+  - **Solução:** só o desligamento espera a conferência. No uso autorizado, o comportamento é o mesmo da v13.
+- **Falha:** `?psiDebug=1&psiAgora=…` simulava a data também no AVA, e qualquer aluno podia abrir a seção na folga.
+  - **Solução:** a data simulada só vale na prévia local (`file:` ou `localhost`). Os testes passaram a fixar o relógio da janela.
+
 ### Limite que permanece
 
 O link direto de uma atividade (`mod/…`) não carrega o banner da seção. Nos dias de folga, a atividade abre. Fechar esse caso exige o script no HTML adicional do site ou outra condição na restrição.
@@ -101,6 +110,12 @@ O link direto de uma atividade (`mod/…`) não carrega o banner da seção. Nos
   - a agenda chega ao runtime pela classe `psi-ag-<dia>-<início>-<fim>`;
   - os dados reais ficam fora do repositório; o repositório traz `dados.exemplo.json`, com conteúdo fictício e retratos em monograma.
 - **Verificação:** os banners de produção gerados com os dados reais saíram idênticos aos anteriores, fora o runtime e a nova classe de agenda.
+
+### v8: licença e crédito
+
+- As animações só começam depois de conferida a licença do domínio. Sem ela, o banner fica estático, com a faixa "Uso não autorizado".
+- Cada banner ganhou a linha de crédito do autor no rodapé e uma marca invisível de autoria.
+- Os comentários são removidos do runtime empacotado, então a autoria vai em constantes de texto dentro do bloco de licença.
 
 ---
 

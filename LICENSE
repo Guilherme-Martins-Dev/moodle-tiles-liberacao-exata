@@ -12,7 +12,14 @@ Este repositório é publicado apenas para visualização.
 Não é permitido, sem autorização prévia e por escrito do titular:
   - usar o código, no todo ou em parte, em qualquer ambiente ou projeto;
   - copiar, reproduzir ou modificar o código;
-  - distribuir, publicar, sublicenciar ou vender o código ou obras derivadas.
+  - distribuir, publicar, sublicenciar ou vender o código ou obras derivadas;
+  - remover, ocultar ou alterar os avisos de autoria, o crédito exibido nos
+    banners, as marcas d'água e o mecanismo de verificação de licença, no
+    código-fonte ou no material gerado por ele.
+
+A autorização de uso é dada por domínio, por meio de uma licença assinada pelo
+titular (doc/LICENCIAMENTO.md). Sem ela, o material gerado se identifica como
+uso não autorizado e deixa de funcionar.
 
 Pedidos de autorização: abra uma issue neste repositório ou entre em contato
 pelo perfil do titular no GitHub.
@@ -31,5 +38,8 @@ Copyright (c) 2026 Guilherme Martins. All rights reserved.
 This repository is published for viewing only. You may view the source code
 and fork it within GitHub as allowed by the GitHub Terms of Service. Any other
 use, copying, modification, distribution, sublicensing or sale requires prior
-written permission from the copyright holder. The software is provided "as is",
+written permission from the copyright holder. Removing, hiding or altering the
+authorship notices, the credit shown on the banners, the watermarks or the
+licence check is not allowed. Permission is granted per domain through a licence
+signed by the copyright holder. The software is provided "as is",
 without warranty of any kind.

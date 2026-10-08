@@ -7,6 +7,7 @@ Não usa cmid nem ids fixos, então serve para qualquer cópia da sala modelo. V
 - Código: [banners/src/psi-sala.js](../banners/src/psi-sala.js)
 - Testes: [testes/](../testes/)
 - Histórico de falhas: [HISTORICO.md](HISTORICO.md)
+- Licença por domínio: [LICENCIAMENTO.md](LICENCIAMENTO.md)
 
 ## O problema
 
@@ -91,6 +92,8 @@ O link direto de uma **atividade** (`mod/…/view.php?id=…`) não carrega o ba
 
 Fechar esse caso exige o script no HTML adicional do site (administrador) ou outra condição na restrição. É raro: o aluno precisaria ter o link da atividade antes de a seção abrir.
 
+A trava do dia exato roda no navegador do aluno. Quem desligar o JavaScript ou alterar o armazenamento local do site fica só com a restrição do servidor, que libera até 6 dias antes. O que protege o conteúdo de verdade é a restrição configurada no Moodle.
+
 ## Como gerar
 
 ```
@@ -111,6 +114,8 @@ npm test
 
 ## Na sala modelo
 
+Antes de gerar, confira se `banners/dados.json` tem a licença do domínio do Moodle ([LICENCIAMENTO.md](LICENCIAMENTO.md)). Sem ela, os banners mostram "Uso não autorizado" e o script da sala não trava nada.
+
 1. **Banners:** colar cada `banners/saida/*.html` na **descrição** da seção correspondente (editar seção, editor HTML em modo código). O `00_principal` vai na descrição da seção Geral. Depois de salvar, conferir se o `<script>` final continua lá.
 2. **Restrição de cada seção:** "Data relativa" após a data de inscrição do usuário, conforme a tabela acima.
 3. **Pesquisa de Satisfação:** criar a seção com esse nome e colar `E_pesquisa.html` na descrição.
@@ -123,6 +128,10 @@ npm test
 | Parâmetro na URL | Efeito |
 |---|---|
 | `?psiDebug=1` | console com a matrícula calculada (e de onde veio) e, por disciplina, D · plugin · data exata · estado |
-| `?psiDebug=1&psiAgora=AAAA-MM-DD` | simula a data de hoje para testar as travas |
+| `?psiDebug=1&psiAgora=AAAA-MM-DD` | simula a data de hoje para testar as travas. **Só na prévia local** (`file:` ou `localhost`); no AVA é ignorado, para o aluno não abrir a seção antes da hora |
+
+No AVA, teste as travas mudando a data de inscrição do aluno de teste.
 
 Para recalcular, limpe o armazenamento do site no F12 (Aplicativo › Armazenamento local).
+
+Se nada trava, digite `PsiLicenca.estado` no console: `negado` indica domínio sem licença.
