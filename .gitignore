@@ -2,13 +2,20 @@
 banners/dados.json
 banners/saida/
 banners/preview.html
-doc/CHECKLIST_SALA_AVA.md
-doc/SECOES_PRATICA_CLINICA.md
-doc/Matriz do curso.md
-doc/EQUIVALÊNCIAS - FORMAÇÃO EM PSICANÁLISE.md
-doc/Projeto_Psicanalise_Clinica_EAD.md
-Atlas Cerebral · Neuropsicanálise/
 paleta_cor/
+
+# Documentos: só os listados abaixo são publicados
+doc/*
+!doc/HISTORICO.md
+!doc/SALA_SCRIPT.md
+!doc/LICENCIAMENTO.md
+
+# Chaves e segredos (a chave privada das licenças fica fora do repositório)
+*.pem
+*.key
+chave-privada*
+.env*
+.claude/
 
 # Imagens (logo e fotos licenciadas não são publicadas)
 img/logo_*
