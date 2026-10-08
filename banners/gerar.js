@@ -1,3 +1,7 @@
+// moodle-tiles-liberacao-exata · Copyright (c) 2026 Guilherme Martins. Todos os direitos reservados.
+// Uso, cópia e modificação dependem de autorização por escrito (ver LICENSE).
+// https://github.com/Guilherme-Martins-Dev/moodle-tiles-liberacao-exata
+//
 // Gera os banners (fragmentos HTML com estilos inline + runtime de animação + script da sala) para
 // a descrição das seções do Moodle (formato Tiles), à prova dos filtros de texto e do editor.
 //
@@ -20,6 +24,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const licenca = require('./licenca.js');
 
 const RAIZ = path.join(__dirname, '..');
 const arg = nome => { const a = process.argv.find(x => x.startsWith(`--${nome}=`)); return a ? a.slice(nome.length + 3) : null; };
@@ -73,6 +78,21 @@ const sigla = slug => { const p = dados.pessoas[slug]; return p.sigla || p.nome.
 const NBSP = '&nbsp;';
 const semTexto = 'font-size:0;line-height:0;';
 
+// ---------- Autoria e licença ----------
+const AUTOR = 'Guilherme Martins';
+const ASSINATURA = `© 2026 ${AUTOR} · moodle-tiles-liberacao-exata · uso sujeito a licença (github.com/Guilherme-Martins-Dev/moodle-tiles-liberacao-exata)`;
+// Marca invisível da saída deste gerador: as iniciais do autor em bits, com caracteres de largura
+// zero (0 = U+200B, 1 = U+200C). Vai no preenchimento da barra da marca, que não tem texto.
+const MARCA_ZW = [...'GM'].map(c => c.charCodeAt(0).toString(2).padStart(8, '0')).join('').replace(/./g, b => b === '1' ? '&#8204;' : '&#8203;');
+// Linha de crédito no rodapé de cada banner (o runtime a recria se faltar: src/psi-licenca.js).
+const credito = `<div class="psi-credito" style="position:relative;z-index:2;padding:7px 18px 8px;text-align:right;font-size:10.5px;letter-spacing:.08em;line-height:1.4;color:rgba(255,255,255,.55);background:rgba(0,0,0,.16);">Desenvolvido por ${AUTOR}</div>`;
+
+// Licenças por domínio (dados.licenca.dominios; emitidas com banners/licenca.js). Só as assinaturas
+// válidas vão para o runtime; fora desses domínios os banners se anunciam como uso não autorizado.
+// dados.licenca.demo: licenças de demonstração (funcionam, com a faixa "Demonstração" no banner).
+const LICENCAS = licenca.conferirDados(dados);
+const LICENCA_CFG = { k: licenca.chavePublica(), d: LICENCAS.validos, m: LICENCAS.demo };
+
 // ---------- Runtime: CFG injetado, comentários removidos e empacotado em base64 ----------
 // Constelação do banner principal: posições fixas (fração do painel) de cada núcleo da estante.
 const POS_NOS = [[0.20, 0.22], [0.52, 0.19], [0.84, 0.25], [0.34, 0.36], [0.68, 0.37], [0.16, 0.50], [0.48, 0.50], [0.86, 0.48]];
@@ -101,8 +121,10 @@ const fonte = (arquivo, marca, cfg) => fs.readFileSync(arquivo, 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//')).join('\n');
 
-// Runtime = animação dos banners + script da sala (src/psi-sala.js; ver doc/SALA_SCRIPT.md).
-const RUNTIME = fonte(path.join(__dirname, 'src', 'psi-banners.js'), '__PSI_CFG__', CFG)
+// Runtime = licença (src/psi-licenca.js; ver doc/LICENCIAMENTO.md) + animação dos banners + script
+// da sala (src/psi-sala.js; ver doc/SALA_SCRIPT.md).
+const RUNTIME = fonte(path.join(__dirname, 'src', 'psi-licenca.js'), '__PSI_LICENCA__', LICENCA_CFG)
+  + '\n' + fonte(path.join(__dirname, 'src', 'psi-banners.js'), '__PSI_CFG__', CFG)
   + '\n' + fonte(path.join(__dirname, 'src', 'psi-sala.js'), '__PSI_SALA__', SALA_CFG);
 
 // base64 não contém ":", ".", "(" nem ")": nenhum filtro do Moodle (URLs, emoticons, glossário)
@@ -192,7 +214,7 @@ function capsulaLogo(h) {
     + `<span role="img" aria-label="${esc(MARCA.nome)}" style="display:block;width:${w}px;height:${h}px;background:url('${LOGO_SRC}') center/contain no-repeat;${semTexto}">${NBSP}</span></span>`;
 }
 
-const barraMarca = `<div aria-hidden="true" style="position:relative;z-index:2;height:4px;overflow:hidden;${semTexto}background:linear-gradient(90deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,.10) 82%,${T.verde} 82%,${T.verde} 88%,${T.dourado} 88%,${T.dourado} 94%,${T.ceruleo} 94%,${T.ceruleo} 100%);">${NBSP}</div>`;
+const barraMarca = `<div aria-hidden="true" style="position:relative;z-index:2;height:4px;overflow:hidden;${semTexto}background:linear-gradient(90deg,rgba(255,255,255,.10) 0%,rgba(255,255,255,.10) 82%,${T.verde} 82%,${T.verde} 88%,${T.dourado} 88%,${T.dourado} 94%,${T.ceruleo} 94%,${T.ceruleo} 100%);">${MARCA_ZW}${NBSP}</div>`;
 
 const chip = txt => `<span class="psi-chip" style="display:inline-block;padding:5px 12px;border:1px solid rgba(255,255,255,.22);border-radius:999px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.92);font-size:12.5px;line-height:1.4;white-space:nowrap;">${esc(txt)}</span>`;
 
@@ -220,7 +242,7 @@ function medalhao(slug, cor, tam, extra = '') {
   const base = `width:${tam}px;height:${tam}px;box-sizing:border-box;border-radius:50%;${extra}`;
   return url
     ? `<span class="psi-med" title="${esc(rotuloPessoa(slug))}" role="img" aria-label="${esc(p.nome)}" style="display:inline-block;${base}${fundoFoto(url, cor)}${semTexto}">${NBSP}</span>`
-    : `<span class="psi-med" title="${esc(rotuloPessoa(slug))}" role="img" aria-label="${esc(p.nome)}" style="display:inline-block;${base}background:linear-gradient(160deg,${mix(cor, '#FFFFFF', 0.22)},${profundo(cor)});color:#FFFFFF;font-family:${T.serif};font-size:${Math.round(tam * 0.36)}px;line-height:${tam - 4}px;text-align:center;">${sigla(slug)}</span>`;
+    : `<span class="psi-med" title="${esc(rotuloPessoa(slug))}" role="img" aria-label="${esc(p.nome)}" style="display:inline-block;${base}background:linear-gradient(160deg,${mix(cor, '#FFFFFF', 0.22)},${profundo(cor)});color:#FFFFFF;font-family:${T.serif};font-size:${Math.round(tam * 0.36)}px;line-height:${tam - 4}px;text-align:center;">${esc(sigla(slug))}</span>`;
 }
 
 const COBRIR = 'position:absolute;left:0;top:0;right:0;bottom:0;';
@@ -310,7 +332,7 @@ function raiz(cfg, cor, conteudo) {
     'background-size:cover,auto,auto', 'background-position:right center,0 0,0 0', 'background-repeat:no-repeat',
   ].join(';');
   const classes = ['nolink', 'psi-banner', `psi-t-${cfg.tipo}`, cfg.g ? `psi-g-${cfg.g}` : '', `psi-s-${cfg.s}`, cfg.ag ? `psi-ag-${cfg.ag}` : ''].filter(Boolean).join(' ');
-  return `<div lang="pt-BR" class="${classes}" style="${estilo};">${conteudo}${barraMarca}${SEM_JS ? '' : SCRIPT}</div>`;
+  return `<div lang="pt-BR" class="${classes}" style="${estilo};">${conteudo}${credito}${barraMarca}${SEM_JS ? '' : SCRIPT}</div>`;
 }
 
 // Layout comum: [glifo + numeral/rótulo | meta, título, epígrafe, texto, extras e chips] [painel do retrato].
@@ -496,7 +518,7 @@ function bannerPrincipal(p) {
     const c = dados.nucleos[k].cor;
     return `<div class="psi-lombada" style="flex:1 1 0;height:${alturas[i]}%;box-sizing:border-box;border-radius:3px 3px 0 0;overflow:hidden;text-align:center;padding-top:18px;`
       + `background:linear-gradient(180deg,rgba(0,0,0,0) 8px,rgba(248,184,0,.6) 8px,rgba(248,184,0,.6) 10px,rgba(0,0,0,0) 10px),linear-gradient(90deg,${mix(c, '#FFFFFF', 0.16)} 0%,${c} 55%,${mix(c, '#000000', 0.2)} 100%);">`
-      + `<span style="display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.82);white-space:nowrap;">${rot}</span></div>`;
+      + `<span style="display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.82);white-space:nowrap;">${esc(rot)}</span></div>`;
   }).join('');
 
   // Constelação: medalhões dos autores (o runtime os move e liga com linhas); núcleos sem autor viram pontos.
@@ -572,7 +594,7 @@ const nomeCurso = dados.principal.titulo;
 fs.mkdirSync(pastaSaida, { recursive: true });
 for (const it of itens) {
   fs.writeFileSync(path.join(pastaSaida, it.arq + '.html'),
-    `<!-- ${it.rot} · Colar no editor HTML (modo código) do rótulo -->\n${it.html}\n`, 'utf8');
+    `<!-- ${it.rot.replace(/--+/g, '–')} · Colar no editor HTML (modo código) do rótulo · ${ASSINATURA} -->\n${it.html}\n`, 'utf8');
 }
 
 // Divisores: um Rótulo por bloco, dentro da seção da disciplina.
@@ -580,7 +602,7 @@ const divisores = itens.flatMap(it => it.divisores || []);
 if (divisores.length) fs.mkdirSync(path.join(pastaSaida, 'divisores'), { recursive: true });
 for (const dv of divisores) {
   fs.writeFileSync(path.join(pastaSaida, 'divisores', dv.arq + '.html'),
-    `<!-- Divisor · Colar no editor HTML (modo código) de um Rótulo, dentro da seção da disciplina -->\n${dv.html}\n`, 'utf8');
+    `<!-- Divisor · Colar no editor HTML (modo código) de um Rótulo, dentro da seção da disciplina · ${ASSINATURA} -->\n${dv.html}\n`, 'utf8');
 }
 
 if (nomesQuestionarios.length) {
@@ -593,7 +615,7 @@ if (nomesQuestionarios.length) {
 // Plano B: se o editor do Moodle remover o <script> dos rótulos, cole este arquivo uma única vez em
 // Administração do site › Aparência › HTML adicional › "Antes de fechar BODY".
 fs.writeFileSync(path.join(pastaSaida, '_runtime_moodle.html'),
-  `<!-- PsiBanners · runtime único para o HTML adicional do site (Antes de fechar BODY). Só age onde houver .psi-banner. -->\n${SCRIPT}\n`, 'utf8');
+  `<!-- PsiBanners · runtime único para o HTML adicional do site (Antes de fechar BODY). Só age onde houver .psi-banner. · ${ASSINATURA} -->\n${SCRIPT}\n`, 'utf8');
 
 
 const preview = `<!doctype html>
@@ -626,3 +648,7 @@ const tamanhos = itens.map(it => Buffer.byteLength(it.html));
 const comFoto = Object.keys(dados.pessoas).filter(s => imagem(s, 'arco')).length;
 console.log(`${itens.length} banners${divisores.length ? ` e ${divisores.length} divisores` : ''} gerados em ${pastaSaida}${SEM_JS ? ' (sem JS)' : ''}`);
 console.log(`Retratos com foto: ${comFoto}/${Object.keys(dados.pessoas).length} (demais com monograma) · fragmentos de ${Math.round(Math.min(...tamanhos) / 1024)} a ${Math.round(Math.max(...tamanhos) / 1024)} KB`);
+if (LICENCAS.invalidos.length) console.warn(`ATENÇÃO: licença inválida para ${LICENCAS.invalidos.join(', ')} (emita de novo com banners/licenca.js)`);
+if (Object.keys(LICENCAS.validos).length) console.log(`Licença conferida para: ${Object.keys(LICENCAS.validos).join(', ')}`);
+if (Object.keys(LICENCAS.demo).length) console.log(`Licença de demonstração para: ${Object.keys(LICENCAS.demo).join(', ')} (banners com a faixa "Demonstração")`);
+if (!Object.keys(LICENCAS.validos).length && !Object.keys(LICENCAS.demo).length && !SEM_JS) console.warn('ATENÇÃO: nenhuma licença válida em dados.licenca. Fora de file: e localhost estes banners mostram "Uso não autorizado" e o script da sala fica desativado (ver doc/LICENCIAMENTO.md).');

@@ -1,5 +1,12 @@
 {
   "marca": { "nome": "Instituição Exemplo" },
+  "licenca": {
+    "titular": "Instituição Exemplo",
+    "dominios": {},
+    "demo": {
+      "ava.exemplo.edu": "v7V8ePDRxj9wOwuzd5H-xrYvTJYCgnQRdqIxrAl8nNIZpjgdWqeUxs0R5-bxV7-K_MbvlkkbrqG9zk39xCGD2g"
+    }
+  },
   "chipsDisciplina": ["Atividade avaliativa"],
 
   "divisores": [

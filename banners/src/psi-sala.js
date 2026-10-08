@@ -1,4 +1,7 @@
 /* Script da sala (moodle-tiles-liberacao-exata)
+   Copyright (c) 2026 Guilherme Martins. Todos os direitos reservados.
+   Uso, cópia e modificação dependem de autorização por escrito (ver LICENSE).
+   https://github.com/Guilherme-Martins-Dev/moodle-tiles-liberacao-exata
 
    Empacotado pelo gerador (banners/gerar.js) junto com psi-banners.js, no fim de cada
    banner. Os banners ficam na descrição das seções (a do 00_principal, na seção Geral, roda em
@@ -26,11 +29,15 @@
 
    Limite: o link direto de uma atividade (mod/…) não carrega o banner; nos dias de folga ele abre.
 
-   Diagnóstico: ?psiDebug=1 (console); ?psiDebug=1&psiAgora=AAAA-MM-DD simula a data de hoje. */
+   Licença: sem a licença do domínio conferida (psi-licenca.js) o script se desliga e desfaz as
+   travas; vale só a restrição do servidor.
+
+   Diagnóstico: ?psiDebug=1 (console). Só na prévia local (file: ou localhost),
+   ?psiDebug=1&psiAgora=AAAA-MM-DD simula a data de hoje; no AVA o parâmetro é ignorado. */
 (function () {
   'use strict';
 
-  var VERSAO = 13;
+  var VERSAO = 14;
   if (window.PsiSala && window.PsiSala.v >= VERSAO) { window.PsiSala.scan(); return; }
 
   // { pesquisa: título da seção Pesquisa de Satisfação,
@@ -48,6 +55,7 @@
   var matricula = null; // null · 'buscando' · 'nenhuma' · Date
   var paginas = {};     // seção -> promessa do HTML da página da seção
   var avisado = '';
+  var desligado = false; // licença não conferida: nada é travado
 
   function log() {
     if (depurar && window.console) console.info.apply(console, ['[PsiSala]'].concat([].slice.call(arguments)));
@@ -127,8 +135,10 @@
     return r;
   }
 
+  // A data simulada só vale na prévia local: no AVA, qualquer aluno poderia abrir a seção antes da hora.
+  var local = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
   function hoje() {
-    var a = depurar && /[?&]psiAgora=(\d{4}-\d{1,2}-\d{1,2})/.exec(location.search);
+    var a = depurar && local && /[?&]psiAgora=(\d{4}-\d{1,2}-\d{1,2})/.exec(location.search);
     return a ? deIso(a[1]) : new Date();
   }
 
@@ -312,7 +322,7 @@
     })();
   }
 
-  function liberacao(c) { return matricula instanceof Date ? somarDias(matricula, c.d) : null; }
+  function liberacao(c) { return !desligado && matricula instanceof Date ? somarDias(matricula, c.d) : null; }
 
   // ======================================================================
   // 2 e 3. Verificador e prazos · visual igual ao da restrição do plugin
@@ -453,11 +463,22 @@
     var curto = lib ? 'Libera ' + fmt(lib) : c.d ? 'Libera D+' + c.d : '';
     if (!selo || !curto || selo.textContent === curto) return;
     dataDoPlugin(el); // guarda a data original antes de reescrever
+    if (!selo.__psiOriginal) selo.__psiOriginal = { txt: selo.textContent, attr: selo.getAttribute('data-original-title') ? 'data-original-title' : 'title' };
+    if (selo.__psiOriginal.dica == null) selo.__psiOriginal.dica = selo.getAttribute(selo.__psiOriginal.attr) || '';
     selo.textContent = curto;
     selo.style.whiteSpace = 'nowrap';
     if (!lib) return;
     var attr = selo.getAttribute('data-original-title') ? 'data-original-title' : 'title';
     selo.setAttribute(attr, htmlDica(lib));
+  }
+
+  // Desfaz trocarSelo (script desligado): a pílula e o tooltip voltam a ser os do plugin.
+  function restaurarSelo(el) {
+    var selo = el.__psiSelo, o = selo && selo.__psiOriginal;
+    if (!o) return;
+    selo.textContent = o.txt;
+    if (o.dica) selo.setAttribute(o.attr, o.dica);
+    selo.__psiOriginal = null;
   }
 
   // ======================================================================
@@ -713,12 +734,12 @@
         pediuMapa = true;
         buscarInicial().then(function (doc) { if (doc) scan(); });
       }
-      descobrirMatricula(lista);
+      if (!desligado) descobrirMatricula(lista);
 
       lista.forEach(function (t) {
         var serv = restritoNoServidor(t.el), lib = liberacao(t.c), estado;
         if (serv) {
-          trocarSelo(t.el, t.c, lib);
+          if (desligado) restaurarSelo(t.el); else trocarSelo(t.el, t.c, lib);
           destravar(t.el);
           estado = 'restrito (servidor)';
         } else if (lib && t.c.d && agora < lib) {
@@ -775,4 +796,16 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
   scan();
+
+  // Licença do domínio (psi-licenca.js). O script começa na hora, para a seção não piscar; se a
+  // licença não for conferida, ou o módulo de licença não existir, tudo o que foi travado é desfeito.
+  function desligar() {
+    desligado = true;
+    esgotado = true;
+    log('licença não conferida: script desativado');
+    scan();
+  }
+  var lic = window.PsiLicenca;
+  if (lic && lic.ok && lic.ok.then) lic.ok.then(function (v) { if (v !== true) desligar(); }, desligar);
+  else desligar();
 })();

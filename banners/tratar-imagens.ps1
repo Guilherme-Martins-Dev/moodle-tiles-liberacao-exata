@@ -1,3 +1,6 @@
+# moodle-tiles-liberacao-exata · Copyright (c) 2026 Guilherme Martins. Todos os direitos reservados.
+# Uso, cópia e modificação dependem de autorização por escrito (ver LICENSE).
+#
 # Trata as fotos dos psicanalistas e as imagens temáticas para os banners.
 #
 # Uso (na raiz do projeto):

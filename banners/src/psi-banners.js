@@ -1,15 +1,19 @@
 /* Runtime de animação dos banners (moodle-tiles-liberacao-exata)
+   Copyright (c) 2026 Guilherme Martins. Todos os direitos reservados.
+   Uso, cópia e modificação dependem de autorização por escrito (ver LICENSE).
+   https://github.com/Guilherme-Martins-Dev/moodle-tiles-liberacao-exata
 
    O gerador (banners/gerar.js) injeta CFG, empacota este arquivo em base64 e o coloca no fim de
    cada rótulo — assim os filtros do Moodle (URLs, emoticons, glossário) não conseguem alterá-lo.
    Define window.PsiBanners uma única vez e anima todos os .psi-banner da página, inclusive os
    injetados depois via AJAX pelo Tiles format. Sem JS, o HTML estático continua completo.
+   Só anima com a licença do domínio conferida (psi-licenca.js); sem ela o banner fica estático.
 
    Diagnóstico: ?psiDebug=1 na URL contorna os banners ativos; o console mostra "[PsiBanners] ativo". */
 (function () {
   'use strict';
 
-  var VERSAO = 7;
+  var VERSAO = 8;
   if (window.PsiBanners && window.PsiBanners.v >= VERSAO) { window.PsiBanners.scan(); return; }
 
   var CFG = __PSI_CFG__;
@@ -784,8 +788,9 @@
     }, 3000);
   }
 
-  var avisado = 0;
+  var avisado = 0, licenciado = false;
   function scan() {
+    if (!licenciado) return;
     banners = banners.filter(function (b) { return b.el.isConnected; });
     var lista = document.querySelectorAll('.psi-banner');
     for (var i = 0; i < lista.length; i++) {
@@ -813,5 +818,7 @@
     }).observe(document.documentElement, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
-  scan();
+  // Sem a licença conferida (ou sem o módulo de licença) nada é animado.
+  var lic = window.PsiLicenca;
+  if (lic && lic.ok && lic.ok.then) lic.ok.then(function (v) { licenciado = v === true; scan(); });
 })();

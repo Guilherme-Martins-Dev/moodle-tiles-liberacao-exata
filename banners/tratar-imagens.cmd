@@ -1,4 +1,5 @@
 @echo off
+rem moodle-tiles-liberacao-exata - Copyright (c) 2026 Guilherme Martins. Todos os direitos reservados.
 rem Trata as fotos (img\psicanalistas e img\temas) e regera os banners.
 rem Carrega o .ps1 como bloco de script, o que funciona mesmo com a execucao de scripts .ps1 bloqueada.
 rem Uso: duplo clique, ou "banners\tratar-imagens.cmd" na raiz do projeto.
